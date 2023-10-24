@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->pb_clearResult->setCheckable(true);
 
+    ptrGraph = new QLineSeries(this);
+
     chart = new QChart( );
     chartView = new QChartView(chart);
 
@@ -191,6 +193,12 @@ void MainWindow::on_pb_path_clicked()
 /****************************************************/
 void MainWindow::on_pb_start_clicked()
 {
+    //Очистка графика
+    if(CheckChart) {
+        ptrGraph->clear();
+        chart->removeSeries(ptrGraph);
+    }
+
     //проверка на то, что файл выбран
     if(pathToFile.isEmpty()){
 
@@ -229,21 +237,39 @@ void MainWindow::on_pb_start_clicked()
         * Тут необходимо реализовать код наполнения серии
         * и вызов сигнала для отображения графика
         */
-        const double step = 0.01;
-        double steps = round((maxs.first()-mins.first())/step);
+        const int step = 1000;
+        int count = 0;
+        x.resize(step);
 
-        x.resize(steps);
-        x[0] = mins.first();
-        for(int i = 1; i<steps; ++i) {
-            x[i] = x[i-1] + step;
+        for(int i = 0; count < step; ++i) {
+            if(res[i] > 0 && res[i] < step) {
+                x[count] = res[i];
+                ++count;
+            }
         }
 
-        y.resize(steps);
-        y[0] = mins.at(1);
-        for(int i = 1; i<steps; ++i) {
-            y[i] = y[i-1] + step;
+        y.resize(step);
+        for(int i = 0; i < step; ++i) {
+            y[i] = res[i];
         }
         emit search_completed();
+
+        //! Старый вариант.
+//        const double step = 0.01;
+//        double steps = round((maxs.first()-mins.first())/step);
+
+//        x.resize(steps);
+//        x[0] = mins.first();
+//        for(int i = 1; i<steps; ++i) {
+//            x[i] = x[i-1] + step;
+//        }
+
+//        y.resize(steps);
+//        y[0] = mins.at(1);
+//        for(int i = 1; i<steps; ++i) {
+//            y[i] = y[i-1] + step;
+//        }
+//        emit search_completed();
     };
 
     auto result = QtConcurrent::run(read)
@@ -253,8 +279,6 @@ void MainWindow::on_pb_start_clicked()
 
 void MainWindow::draw_a_graph()
 {
-    QLineSeries* ptrGraph = new QLineSeries(this);;
-
     //Создадим объекты серий
     ptrGraph = new QLineSeries(this);
 
@@ -269,7 +293,7 @@ void MainWindow::draw_a_graph()
         size = x.size();
     }
 
-    //Добавление точе в серию осуществляется при помощи метода append.
+    //Добавление точек в серию осуществляется при помощи метода append.
     for(int j = 0; j<size; j++){
         ptrGraph->append(x[j],y[j]);
     }
@@ -279,6 +303,7 @@ void MainWindow::draw_a_graph()
     chartView->chart()->createDefaultAxes();
     chartView->resize(400, 400);
     chartView->show();
+    CheckChart = true;
 }
 
 

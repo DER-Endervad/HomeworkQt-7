@@ -55,8 +55,10 @@ private:
     QVector<double> procesData;
     QVector<double> mins, maxs;
     QVector<double> x, y;
+    QLineSeries* ptrGraph;
     QChart* chart;
     QChartView* chartView;
+    bool CheckChart = false;
 
 private slots:
     void draw_a_graph();
