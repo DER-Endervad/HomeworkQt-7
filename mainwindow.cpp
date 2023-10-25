@@ -280,7 +280,6 @@ void MainWindow::on_pb_start_clicked()
 void MainWindow::draw_a_graph()
 {
     //Создадим объекты серий
-    ptrGraph = new QLineSeries(this);
 
     //Зададим размер графика, т.е. количество точек.
     uint32_t size = 0;
